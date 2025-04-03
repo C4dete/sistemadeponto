@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartão de Ponto</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <h1>Cartão de Ponto</h1>
+
+    <label for="mes">Selecione o Mês:</label>
+    <select id="mes">
+        <option value="01">Janeiro</option>
+        <option value="02">Fevereiro</option>
+        <option value="03">Março</option>
+        <option value="04">Abril</option>
+        <option value="05">Maio</option>
+        <option value="06">Junho</option>
+        <option value="07">Julho</option>
+        <option value="08">Agosto</option>
+        <option value="09">Setembro</option>
+        <option value="10">Outubro</option>
+        <option value="11">Novembro</option>
+        <option value="12">Dezembro</option>
+    </select>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Dia</th>
+                <th>Semana</th>
+                <th>Entrada</th>
+                <th>Saída</th>
+                <th>HP</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-ponto">
+            <!-- As linhas serão preenchidas pelo JavaScript -->
+        </tbody>
+    </table>
+
+    <h2>Resumo</h2>
+    <p>Total de Crédito: <span id="total-credit">00:00</span></p>
+    <p>Total de Débito: <span id="total-debit">00:00</span></p>
+    <p>Banco de Horas Acumulado: <span id="bank-hours">00:00</span></p>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
