@@ -15,15 +15,14 @@
             <option value="2">Fevereiro</option>
             <option value="3">Março</option>
             <option value="4" selected>Abril</option>
-            <option value="5" selected>Maio</option>
-            <option value="6" selected>Junho</option>
-            <option value="7" selected>Julho</option>
-            <option value="8" selected>Agosto</option>
-            <option value="9" selected>Setembro</option>
-            <option value="10" selected>Outubro</option>
-            <option value="11" selected>Novembro</option>
-            <option value="12" selected>Dezembro</option>
-            <!-- Adicione os demais meses conforme necessário -->
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
         </select>
 
         <table id="tabela-ponto">
@@ -31,9 +30,11 @@
         </table>
 
         <div class="resumo">
+            <div>Histórico Banco de Horas: <span id="historico-horas">{{ horas_historico }}</span></div>
+            <div>Total Banco de Horas Mês: <span id="bank-hours">00:00</span></div>
             <div>Total de Créditos: <span id="total-credit">00:00</span></div>
             <div>Total de Débitos: <span id="total-debit">00:00</span></div>
-            <div>Banco de Horas Acumulado: <span id="bank-hours">00:00</span></div>
+            <div>Total Acumulado: <span id="total-final">00:00</span></div>
         </div>
     </main>
 
@@ -146,9 +147,21 @@
                     bancoHoras += saldo;
                 });
 
+                // Histórico salvo no backend (vindo do Flask)
+                const historicoElement = document.getElementById("historico-horas");
+                const historicoMinutos = historicoElement
+                    ? parseInt(historicoElement.textContent.split(":")[0]) * 60 +
+                      parseInt(historicoElement.textContent.split(":")[1])
+                    : 0;
+
+                // Calculando total final
+                const bancoFinal = bancoHoras + historicoMinutos;
+
+                // Atualizando os valores na página
                 document.getElementById("total-credit").textContent = formatarTempo(totalCredito);
                 document.getElementById("total-debit").textContent = formatarTempo(totalDebito);
                 document.getElementById("bank-hours").textContent = formatarTempo(bancoHoras);
+                document.getElementById("total-final").textContent = formatarTempo(bancoFinal);
             }
 
             function formatarTempo(minutos) {
