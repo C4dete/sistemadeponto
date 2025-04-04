@@ -3,8 +3,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const mesSelect = document.getElementById("mes");
 
     function gerarTabela(mes) {
-        tabelaPonto.innerHTML = ""; // Limpa a tabela antes de recriar
-        const diasNoMes = new Date(2024, mes, 0).getDate(); // Pega a quantidade de dias no mês
+        tabelaPonto.innerHTML = "";
+        const diasNoMes = new Date(2024, mes, 0).getDate();
 
         for (let dia = 1; dia <= diasNoMes; dia++) {
             const data = new Date(2024, mes - 1, dia);
@@ -57,37 +57,39 @@ document.addEventListener("DOMContentLoaded", function () {
             const minutosSaida = hSaida * 60 + mSaida;
             const minutosTrabalhados = minutosSaida - minutosEntrada;
 
-            const jornadaPadrao = 9 * 60 + 48; // 9h48min (588 minutos)
+            const jornadaPadrao = 9 * 60 + 48; // 588 minutos
             let saldo = minutosTrabalhados - jornadaPadrao;
 
             if (diaSemana === "Sáb") {
-                totalCredito += saldo * 1.5; // Sábado +50%
+                // Crédito do período total com 50% extra
+                totalCredito += minutosTrabalhados * 1.5;
+                bancoHoras += minutosTrabalhados * 1.5;
             } else if (diaSemana === "Dom") {
-                totalCredito += saldo * 2; // Domingo +100%
+                // Crédito do período total com 100% extra
+                totalCredito += minutosTrabalhados * 2;
+                bancoHoras += minutosTrabalhados * 2;
             } else {
-                // Aplicar tolerância de 10 minutos apenas nos dias úteis
+                // Dias úteis com regra de tolerância
                 if (minutosEntrada >= 380 && minutosEntrada <= 519) { // 06:20 a 08:39
                     if (saldo >= 10) {
-                        saldo = saldo; // Contabiliza normalmente após os 10 minutos
-                    } else if (saldo >= 1 && saldo <= 10) {
-                        // Dentro da tolerância positiva, não contabiliza
+                        // saldo permanece como está
+                    } else if (saldo >= 1 && saldo < 10) {
                         saldo = 0;
                     } else if (saldo <= -10) {
-                        saldo = saldo; // Contabiliza normalmente após os -10 minutos
-                    } else if (saldo >= -10 && saldo <= -1) {
-                        // Dentro da tolerância negativa, não contabiliza
+                        // saldo permanece como está
+                    } else if (saldo < 0 && saldo > -10) {
                         saldo = 0;
                     }
                 }
 
-                // Acumula no total de crédito ou débito
                 if (saldo > 0) {
                     totalCredito += saldo;
                 } else if (saldo < 0) {
                     totalDebito += Math.abs(saldo);
                 }
+
+                bancoHoras += saldo;
             }
-            bancoHoras += saldo;
         });
 
         document.getElementById("total-credit").textContent = formatarTempo(totalCredito);
