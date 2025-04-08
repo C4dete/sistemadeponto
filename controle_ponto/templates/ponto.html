@@ -127,11 +127,11 @@
                     }
 
                     if (minutosEntrada >= 380 && minutosEntrada <= 519) {
-                        if (saldo >= 10) {
+                        if (saldo > 10) {
                             saldo = saldo;
                         } else if (saldo >= 1 && saldo <= 10) {
                             saldo = 0;
-                        } else if (saldo <= -10) {
+                        } else if (saldo < -10) {
                             saldo = saldo;
                         } else if (saldo >= -10 && saldo <= -1) {
                             saldo = 0;
