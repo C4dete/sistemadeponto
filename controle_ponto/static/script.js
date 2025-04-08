@@ -2,23 +2,37 @@ document.addEventListener("DOMContentLoaded", function () {
     const tabelaPonto = document.getElementById("tabela-ponto");
     const mesSelect = document.getElementById("mes");
 
+    const tolerancia = 10; // minutos de tolerância configurável
+
     function gerarTabela(mes) {
         tabelaPonto.innerHTML = "";
         const diasNoMes = new Date(2024, mes, 0).getDate();
+
+        const cabecalho = document.createElement("tr");
+        cabecalho.innerHTML = `
+            <th>Dia</th>
+            <th>Semana</th>
+            <th>Entrada</th>
+            <th>Saída</th>
+            <th>Ação</th>
+        `;
+        tabelaPonto.appendChild(cabecalho);
 
         for (let dia = 1; dia <= diasNoMes; dia++) {
             const data = new Date(2024, mes - 1, dia);
             const diaSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][data.getDay()];
 
             const linha = document.createElement("tr");
-            linha.innerHTML = 
+            if (diaSemana === "Sáb") linha.classList.add("sabado");
+            if (diaSemana === "Dom") linha.classList.add("domingo");
+
+            linha.innerHTML = `
                 <td>${dia}</td>
                 <td>${diaSemana}</td>
                 <td><input type="time" class="entrada"></td>
                 <td><input type="time" class="saida"></td>
                 <td><button class="hp-button">HP</button></td>
-            ;
-
+            `;
             tabelaPonto.appendChild(linha);
         }
 
@@ -45,9 +59,9 @@ document.addEventListener("DOMContentLoaded", function () {
         let bancoHoras = 0;
 
         document.querySelectorAll("#tabela-ponto tr").forEach(row => {
-            const entrada = row.querySelector(".entrada").value;
-            const saida = row.querySelector(".saida").value;
-            const diaSemana = row.cells[1].textContent;
+            const entrada = row.querySelector(".entrada")?.value;
+            const saida = row.querySelector(".saida")?.value;
+            const diaSemana = row.cells[1]?.textContent;
 
             if (!entrada || !saida) return;
 
@@ -57,44 +71,44 @@ document.addEventListener("DOMContentLoaded", function () {
             const minutosSaida = hSaida * 60 + mSaida;
             const minutosTrabalhados = minutosSaida - minutosEntrada;
 
-            const jornadaPadrao = 9 * 60 + 48; // 588 minutos
+            const jornadaPadrao = 9 * 60 + 48;
             let saldo = minutosTrabalhados - jornadaPadrao;
 
             if (diaSemana === "Sáb") {
-                // Crédito do período total com 50% extra
                 totalCredito += minutosTrabalhados * 1.5;
                 bancoHoras += minutosTrabalhados * 1.5;
-            } else if (diaSemana === "Dom") {
-                // Crédito do período total com 100% extra
+                return;
+            }
+
+            if (diaSemana === "Dom") {
                 totalCredito += minutosTrabalhados * 2;
                 bancoHoras += minutosTrabalhados * 2;
-            } else {
-                // Dias úteis com regra de tolerância
-                if (minutosEntrada >= 380 && minutosEntrada <= 519) { // 06:20 a 08:39
-                    if (saldo >= 10) {
-                        // saldo permanece como está
-                    } else if (saldo >= 1 && saldo < 10) {
-                        saldo = 0;
-                    } else if (saldo <= -10) {
-                        // saldo permanece como está
-                    } else if (saldo < 0 && saldo > -10) {
-                        saldo = 0;
-                    }
-                }
-
-                if (saldo > 0) {
-                    totalCredito += saldo;
-                } else if (saldo < 0) {
-                    totalDebito += Math.abs(saldo);
-                }
-
-                bancoHoras += saldo;
+                return;
             }
+
+            if (minutosEntrada >= 380 && minutosEntrada <= 519) {
+                if (saldo >= 1 && saldo <= tolerancia) saldo = 0;
+                if (saldo >= -tolerancia && saldo <= -1) saldo = 0;
+            }
+
+            if (saldo > 0) totalCredito += saldo;
+            else if (saldo < 0) totalDebito += Math.abs(saldo);
+
+            bancoHoras += saldo;
         });
+
+        const historicoElement = document.getElementById("historico-horas");
+        const historicoMinutos = historicoElement
+            ? parseInt(historicoElement.textContent.split(":")[0]) * 60 +
+              parseInt(historicoElement.textContent.split(":")[1])
+            : 0;
+
+        const bancoFinal = bancoHoras + historicoMinutos;
 
         document.getElementById("total-credit").textContent = formatarTempo(totalCredito);
         document.getElementById("total-debit").textContent = formatarTempo(totalDebito);
         document.getElementById("bank-hours").textContent = formatarTempo(bancoHoras);
+        document.getElementById("total-final").textContent = formatarTempo(bancoFinal);
     }
 
     function formatarTempo(minutos) {
@@ -102,10 +116,9 @@ document.addEventListener("DOMContentLoaded", function () {
         minutos = Math.abs(minutos);
         const horas = Math.floor(minutos / 60);
         const mins = minutos % 60;
-        return ${sinal}${String(horas).padStart(2, "0")}:${String(mins).padStart(2, "0")};
+        return `${sinal}${String(horas).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
     }
 
     mesSelect.addEventListener("change", () => gerarTabela(mesSelect.value));
-
     gerarTabela(mesSelect.value);
 });
