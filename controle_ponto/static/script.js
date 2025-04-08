@@ -40,58 +40,57 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function calcularResumo() {
+        const toleranciaMinutos = 11; // ✅ Edite aqui se quiser mudar a tolerância
         let totalCredito = 0;
         let totalDebito = 0;
         let bancoHoras = 0;
-
+    
         document.querySelectorAll("#tabela-ponto tr").forEach(row => {
-            const entrada = row.querySelector(".entrada").value;
-            const saida = row.querySelector(".saida").value;
-            const diaSemana = row.cells[1].textContent;
-
+            const entrada = row.querySelector(".entrada")?.value;
+            const saida = row.querySelector(".saida")?.value;
+            const diaSemana = row.cells[1]?.textContent;
+    
             if (!entrada || !saida) return;
-
+    
             const [hEntrada, mEntrada] = entrada.split(":").map(Number);
             const [hSaida, mSaida] = saida.split(":").map(Number);
             const minutosEntrada = hEntrada * 60 + mEntrada;
             const minutosSaida = hSaida * 60 + mSaida;
             const minutosTrabalhados = minutosSaida - minutosEntrada;
-
+    
             const jornadaPadrao = 9 * 60 + 48; // 588 minutos
             let saldo = minutosTrabalhados - jornadaPadrao;
-
+    
             if (diaSemana === "Sáb") {
-                // Crédito do período total com 50% extra
                 totalCredito += minutosTrabalhados * 1.5;
                 bancoHoras += minutosTrabalhados * 1.5;
             } else if (diaSemana === "Dom") {
-                // Crédito do período total com 100% extra
                 totalCredito += minutosTrabalhados * 2;
                 bancoHoras += minutosTrabalhados * 2;
             } else {
-                // Dias úteis com regra de tolerância
-                if (minutosEntrada >= 380 && minutosEntrada <= 519) { // 06:20 a 08:39
-                    if (saldo >= 10) {
-                        // saldo permanece como está
-                    } else if (saldo >= 1 && saldo < 10) {
+                // Aplica tolerância de entrada entre 06:20 e 08:39
+                if (minutosEntrada >= 380 && minutosEntrada <= 519) {
+                    if (saldo >= toleranciaMinutos) {
+                        // saldo positivo válido
+                    } else if (saldo > 0 && saldo < toleranciaMinutos) {
                         saldo = 0;
-                    } else if (saldo <= -10) {
-                        // saldo permanece como está
-                    } else if (saldo < 0 && saldo > -10) {
+                    } else if (saldo <= -toleranciaMinutos) {
+                        // saldo negativo válido
+                    } else if (saldo < 0 && saldo > -toleranciaMinutos) {
                         saldo = 0;
                     }
                 }
-
+    
                 if (saldo > 0) {
                     totalCredito += saldo;
                 } else if (saldo < 0) {
                     totalDebito += Math.abs(saldo);
                 }
-
+    
                 bancoHoras += saldo;
             }
         });
-
+    
         document.getElementById("total-credit").textContent = formatarTempo(totalCredito);
         document.getElementById("total-debit").textContent = formatarTempo(totalDebito);
         document.getElementById("bank-hours").textContent = formatarTempo(bancoHoras);
