@@ -1,0 +1,31 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.env/
+.env
+
+# Logs
+*.log
+
+# IDE / Editor configs
+.vscode/
+*.code-workspace
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Python environment settings
+*.egg-info/
+.eggs/
+
+# JSONs que não quiser versionar (remova se quiser manter no Git)
+*.sqlite3
+*.db
+
+# Static file cache (caso gere arquivos compilados)
+static/**/*.map
